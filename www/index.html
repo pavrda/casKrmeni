@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html ng-app="readerApp">
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=160" />
+    <title>Čas krmení</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+<!--     
+    <script type="text/javascript" src="js/angular.js"></script>
+    <script type="text/javascript" src="js/angular-sanitize.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/dbService.js"></script>
+    <script type="text/javascript" src="js/controllers.js"></script>
+ -->    
+    <script type="text/javascript" src="phonegap.js"></script>
+<style>
+.subPage {
+	display: none;
+}
+</style>
+</head>
+<body>
+<script>
+
+var sUsername = "";
+var sSecret = "";
+	
+
+function showPage(pPage) {
+	if (pPage == "login") {
+		$("#divLogin").show();
+		$("#divObjednavka").hide();
+		document.forms.loginForm.username.focus();
+	} else if (pPage == "objednavka") {
+		$("#divLogin").hide();
+		$("#divObjednavka").show();	
+		goObjednavka();
+	}
+}
+
+function onError() {
+	alert("Chyba");
+}
+
+function gotLogin(data) {
+	if (data.status != "ok") {
+		alert("Špatné jméno nebo heslo");
+		document.forms.loginForm.username.focus();
+		return;
+	}
+	sSecret = data.secret;
+	
+	window.localStorage.setItem('casKrmeni-login',sLogin);
+	window.localStorage.setItem('casKrmeni-secret',sSecret);
+	showPage("objednavka");
+}
+
+function goLogin() {
+	var lUsername = $("#txtUsername").val();
+	var lPassword = $("#txtPassword").val();
+	sUsername = lUsername;
+	$.ajax({
+        type: 'GET',
+        url: "https://www.caskrmeni.cz/res/caskrmeni/api/login.php",
+        data: {
+        	"username":lUsername,
+        	"password":lPassword
+        },
+        success: gotLogin,
+        error: onError
+    });
+	return false;
+}
+
+function goLogout() {
+	window.localStorage.setItem('casKrmeni-login',"");
+	window.localStorage.setItem('casKrmeni-secret',"");	
+	$("#txtUsername").val("");
+	$("#txtPassword").val("");
+	showPage("login");
+}
+function cena(s) {
+	return s;
+}
+
+function renderObjednavka(data) {
+
+	var s = "" + 
+		"<table>" +
+		"<tr><td>Objednávka číslo:</td><td>" + data.cisloObjednavky + "</td></tr>" +
+		"<tr><td>Způsob dodání:</td><td>" + data.dodaniZpusob + " (" + cena(data.dodaniCena) +  ") </td></tr>" +
+		"<tr><td>Způsob platby:</td><td>" + data.platbaZpusob + " (" + cena(data.platbaCena) +  ") </td></tr>" +
+		"<tr><td>Celková cena:</td><td>" + cena(data.cenaCelkem) + "</td></tr>" +
+		"<tr><td>Položky:</td><td>&nbsp;</td></tr>" +
+		"</table>" +
+		"" +
+		"<table>" +
+		"<tr><th style=\"width:70px;\" >Kód</th><th align=\"right\">Cena za kus</th><th align=\"right\">Množství</th><th align=\"right\">Bez DPH</th><th style=\"width:45px;\" align=\"center\">DPH</th><th align=\"center\">S DPH</th></tr>";
+
+	for(var i=0; i<data.polozky.length; i++) {
+		var p = data.polozky[i];
+		var c = (i & 1) ? " class=\"licha\"" : "";
+		s += "<tr" + c + "><td colspan=\"6\">" + p.nazev + "</td></tr>" +
+			 "<tr" + c + "><td>" + p.kod + "</td><td align=\"right\">" + cena(p.cenaKus) + "</td><td align=\"center\">" + p.mnozstvi + "</td>" +
+			 "<td align=\"right\">" + cena(p.bezDPH) + "</td><td align=\"center\">" + cena(p.DPH) + "</td><td align=\"right\">" + cena(p.sDPH) + "</td></tr>";
+	}
+		
+	s += "</table>" +
+		"" +
+		"<table>" +
+		"<tr><td>Adresa dodání:</td><td>&nbsp;</td></tr>" +
+		"<tr><td>Jméno:</td><td>" + data.jmeno + "</td></tr>" +
+		"<tr><td>Adresa:</td><td>" + data.adresa + "</td></tr>" +
+		"<tr><td>Město:</td><td>" + data.psc + " " + data.mesto + "</td></tr>" +
+		"</table>" +	
+	"";
+	$("#divObjednavkaBody").html(s);
+	
+}
+
+function gotObjednavka(data) {
+	if (data.status != "ok") {
+		alert("Nelze zjistit poslední objednávku");
+		goLogout();
+		return;
+	}
+	alert("mam data ok");
+	renderObjednavka(data);
+	
+	
+}
+
+function goObjednavka() {
+	$.ajax({
+        type: 'GET',
+        url: "https://www.caskrmeni.cz/res/caskrmeni/api/get_last_order.php",
+        data: {
+        	"username":sUsername,
+        	"secret":sSecret
+        },
+        success: gotObjednavka,
+        error: onError
+    });
+}
+
+function onDeviceReady() {
+	sUsername = window.localStorage.getItem('casKrmeni-login');
+	sSecret = window.localStorage.getItem('casKrmeni-secret');
+	if (!sUsername || !sSecret) {
+		showPage("login");
+	} else {
+		showPage("objednavka");
+	}
+	
+	try {
+		navigator.splashscreen.hide();
+	} catch(e) {};
+}
+
+
+document.addEventListener("deviceready", onDeviceReady, false);	
+if (!window.cordova) {
+	$(document).ready(onDeviceReady);
+}
+
+</script>
+<h1>Čas krmení</h1>
+<div id="divLogin" class="subPage">
+	<form name="loginForm" onsubmit="return goLogin()">
+		Jméno:<br />
+		<input type="text" name="username" id="txtUsername" /><br />
+		<br />
+		Heslo:<br />
+		<input type="password" name="password" id="txtPassword" /><br />
+		<input type="submit" value="Přihlásit se" />
+	</form>
+</div>
+<div id="divObjednavka" class="subPage">
+	<div id="divObjednavkaBody"></div>
+
+	<form name="logoutForm">
+		<input type="button" value="Odhlásit se" onclick="goLogout()" />
+	</form>
+</div>
+</body>
+</html>
+    
