@@ -41,7 +41,7 @@ function showPage(pPage) {
 }
 
 function onError() {
-	alert("Chyba");
+	alert("Nelze se připojit. Máte zapnutý internet?", "Chyba spojení");
 }
 
 function gotLogin(data) {
@@ -52,8 +52,8 @@ function gotLogin(data) {
 	}
 	sSecret = data.secret;
 	
-	window.localStorage.setItem('casKrmeni-login',sLogin);
-	window.localStorage.setItem('casKrmeni-secret',sSecret);
+	window.localStorage.setItem('casKrmeni-login', sUsername);
+	window.localStorage.setItem('casKrmeni-secret', sSecret);
 	showPage("objednavka");
 }
 
@@ -154,9 +154,13 @@ function onDeviceReady() {
 		showPage("objednavka");
 	}
 	
-	try {
-		navigator.splashscreen.hide();
-	} catch(e) {};
+	setTimeout(function() {
+		try {
+			navigator.splashscreen.hide();
+		} catch(e) {};
+    }, 1000);
+	
+	
 }
 
 
