@@ -23,11 +23,17 @@ function showPage(pPage) {
 	if (pPage == "login") {
 		$("#divLogin").show();
 		$("#divObjednavka").hide();
+		$("#divDekujeme").hide();
 		document.forms.loginForm.username.focus();
 	} else if (pPage == "objednavka") {
 		$("#divLogin").hide();
 		$("#divObjednavka").show();	
+		$("#divDekujeme").hide();
 		goObjednavka();
+	} else if (pPage == "dekujeme") {
+		$("#divLogin").hide();
+		$("#divObjednavka").hide();	
+		$("#divDekujeme").show();
 	}
 }
 
@@ -90,14 +96,14 @@ function renderObjednavka(data) {
 		"<tr><td>Objednávka číslo:</td><td>" + data.cisloObjednavky + "</td></tr>" +
 		"<tr><td>Způsob dodání:</td><td>" + data.dodaniZpusob + " (" + cena(data.dodaniCena) +  ") </td></tr>" +
 		"<tr><td>Způsob platby:</td><td>" + data.platbaZpusob + " (" + cena(data.platbaCena) +  ") </td></tr>" +
-		"<tr><td>Celková cena:</td><td>" + cena(data.cenaCelkem) + "</td></tr>" +
+		"<tr><td>&nbsp;</td><td>&nbsp;</td></tr>" +		
 		"<tr><td>Položky:</td><td>&nbsp;</td></tr>" +
 		"</table>" +
 		"" +
-		"<table cellspacing=0 cellpadding=2 width=\"100%\">" +
+		"<table cellspacing=0 cellpadding=2 width=\"100%\" border=0>" +
 //		"<tr><th style=\"width:70px;\" >Kód</th><th align=\"right\">Cena za kus</th><th align=\"right\">Množství</th><th align=\"right\">Bez DPH</th><th style=\"width:45px;\" align=\"center\">DPH</th><th align=\"center\">S DPH</th></tr>";
 		"<tr><th colspan=\"3\">Název</th></tr>" +
-		"<tr><th>Kód</th><th align=\"right\">Množství</th><th align=\"center\">S DPH</th></tr>";
+		"<tr><th>Kód</th><th align=\"right\">Množství</th><th align=\"right\">Cena</th></tr>";
 
 	for(var i=0; i<data.polozky.length; i++) {
 		var p = data.polozky[i];
@@ -108,7 +114,7 @@ function renderObjednavka(data) {
 			 "<td align=\"right\">" + cena(p.bezDPH) + "</td><td align=\"center\">" + cena(p.DPH) + "</td><td align=\"right\">" + cena(p.sDPH) + "</td></tr>";
 */
 		s += "<tr" + c + "><td colspan=\"3\">" + p.nazev + "</td></tr>" +
-		 "<tr" + c + "><td>" + p.kod + "</td><td align=\"center\">" + p.mnozstvi + "</td><td align=\"right\">" + cena(p.sDPH) + "</td></tr>";
+		 "<tr" + c + "><td>" + p.kod + "</td><td align=\"right\">" + p.mnozstvi + "</td><td align=\"right\">" + cena(p.sDPH) + "</td></tr>";
 			 
 			 
 	}
@@ -116,11 +122,16 @@ function renderObjednavka(data) {
 	s += "</table>" +
 		"" +
 		"<table>" +
+		"<tr><td>Celková cena:</td><td><b>" + cena(data.cenaCelkem) + "</b></td></tr>" +
+		"<tr><td>&nbsp;</td><td>&nbsp;</td></tr>" +
 		"<tr><td>Adresa dodání:</td><td>&nbsp;</td></tr>" +
 		"<tr><td>Jméno:</td><td>" + data.jmeno + "</td></tr>" +
 		"<tr><td>Adresa:</td><td>" + data.adresa + "</td></tr>" +
 		"<tr><td>Město:</td><td>" + data.psc + " " + data.mesto + "</td></tr>" +
-		"</table>" +	
+		"</table>" +
+		"" +
+		"<div class=\"center\"><input type=\"button\" value=\"Objednat znovu\" onclick=\"goObjednej()\" class=\"btnObjednat\"/></div>" +
+		"<br /><br /><br />&nbsp;" +
 	"";
 	$("#divObjednavkaBody").html(s);
 	
@@ -138,7 +149,7 @@ function gotObjednavka(data) {
 
 function goObjednavka() {
 	sObjednavka = "";
-	$("#divObjednavkaBody").html("Načítám ...");
+//	$("#divObjednavkaBody").html("Načítám ...");
 	$.ajax({
         type: 'GET',
         url: "https://www.caskrmeni.cz/res/caskrmeni/api/get_last_order.php",
@@ -154,10 +165,8 @@ function goObjednavka() {
 
 
 function renderObjednano(data) {
-
-	var s = "Objednávka přijata pod číslem:<br />" + data.cisloObjednavky;
-	$("#divObjednavkaBody").html(s);
-	
+	$("#spanObjednavka").html(data.cisloObjednavky);
+	showPage("dekujeme");
 }
 
 function gotObjednano(data) {
@@ -186,6 +195,9 @@ function goObjednej() {
     });
 }
 
+function goZpet() {
+	showPage("objednavka");
+}
 
 function onDeviceReady() {
 	sUsername = window.localStorage.getItem('casKrmeni-login');
@@ -193,7 +205,8 @@ function onDeviceReady() {
 	if (!sUsername || !sSecret) {
 		showPage("login");
 	} else {
-		showPage("objednavka");
+//		showPage("objednavka");
+		showPage("dekujeme");
 	}
 	
 	setTimeout(function() {
@@ -212,7 +225,7 @@ if (!window.cordova) {
 }
 
 </script>
-<div class="horni"><img src="img/logo.jpg" width="100%" /></div>
+<div class="horni"><a onclick="navigator.app.loadUrl('http://www.caskrmeni.cz', { openExternal:true });"><img src="img/logo.jpg" width="100%" border="0"/></a></div>
 <div id="divLogin" class="subPage">
 	<form class="loginForm" name="loginForm" onsubmit="return goLogin()">
 		Jméno:<br />
@@ -227,16 +240,12 @@ if (!window.cordova) {
 </div>
 <div id="divObjednavka" class="subPage">
 	<div id="divObjednavkaBody"></div>
-
-	<form name="logoutForm">
-		<table width="100%">
-			<tr>
-				<td align="left"><input type="button" value="Odhlásit se" onclick="goLogout()" /></td>
-				<td align="right"><input type="button" value="Objednat znovu" onclick="goObjednej()" /></td>
-			</tr>
-		</table>
-		
-	</form>
+</div>
+<div id="divDekujeme" class="subPage">
+	<div class="center">Děkujeme za Vaši objednávku. Přijali jsme ji pod číslem:<br />
+		<span id="spanObjednavka">1231231</span><br /><br />
+		<input type="button" value="Zpět na objednávku" class="btnZpet" onclick="goZpet()" />
+	</div>
 </div>
 </body>
 </html>
