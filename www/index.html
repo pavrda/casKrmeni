@@ -204,7 +204,11 @@ function goExit() {
 }
 
 function goShop() {
-	navigator.app.loadUrl('http://www.caskrmeni.cz', { openExternal:true });
+	if (window.device && parseFloat(window.device.version) >= 7) {
+		window.open("http://www.caskrmeni.cz", '_system');
+	} else {
+		navigator.app.loadUrl('http://www.caskrmeni.cz', { openExternal:true });
+	}
 }
 
 function onDeviceReady() {
