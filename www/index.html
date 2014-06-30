@@ -118,11 +118,11 @@ function renderObjednavka(data) {
 			 
 			 
 	}
+	s += "<tr><td colspan=\"2\"><b>Celková cena:</b></td><td align=\"right\"><b>" + cena(data.cenaCelkem) + "</b></td></tr>";
 		
 	s += "</table>" +
 		"" +
 		"<table>" +
-		"<tr><td><b>Celková cena:</b></td><td><b>" + cena(data.cenaCelkem) + "</b></td></tr>" +
 		"<tr><td>&nbsp;</td><td>&nbsp;</td></tr>" +
 		"<tr><td>Adresa dodání:</td><td>&nbsp;</td></tr>" +
 		"<tr><td>Jméno:</td><td>" + data.jmeno + "</td></tr>" +
