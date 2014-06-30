@@ -203,6 +203,10 @@ function goExit() {
 	navigator.app.exitApp();
 }
 
+function goShop() {
+	navigator.app.loadUrl('http://www.caskrmeni.cz', { openExternal:true });
+}
+
 function onDeviceReady() {
 	sUsername = window.localStorage.getItem('casKrmeni-login');
 	sSecret = window.localStorage.getItem('casKrmeni-secret');
@@ -228,9 +232,9 @@ if (!window.cordova) {
 }
 
 </script>
-<div class="horni"><a onclick="navigator.app.loadUrl('http://www.caskrmeni.cz', { openExternal:true });"><img src="img/logo.jpg" width="100%" border="0"/></a></div>
+<div class="horni"><a onclick="goShop()"><img src="img/logo.jpg" width="100%" border="0"/></a></div>
 <div id="divLogin" class="subPage">
-	<div class="center">Aplikace pro opakované objednávání z e-shopu <a href="http://www.caskrmeni.cz">www.caskrmeni.cz</a>.<br />&nbsp;</div>
+	<div class="center">Aplikace pro opakované objednávání z e-shopu <a onclick="goShop()" href="#">www.caskrmeni.cz</a>.<br />&nbsp;</div>
 	<form class="loginForm" name="loginForm" onsubmit="return goLogin()">
 		Jméno:<br />
 		<input type="text" name="username" id="txtUsername" value=""/><br />
