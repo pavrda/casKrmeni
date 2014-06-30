@@ -199,6 +199,10 @@ function goZpet() {
 	showPage("objednavka");
 }
 
+function goExit() {
+	navigator.app.exitApp();
+}
+
 function onDeviceReady() {
 	sUsername = window.localStorage.getItem('casKrmeni-login');
 	sSecret = window.localStorage.getItem('casKrmeni-secret');
@@ -226,6 +230,7 @@ if (!window.cordova) {
 </script>
 <div class="horni"><a onclick="navigator.app.loadUrl('http://www.caskrmeni.cz', { openExternal:true });"><img src="img/logo.jpg" width="100%" border="0"/></a></div>
 <div id="divLogin" class="subPage">
+	<div class="center">Aplikace pro opakované objednávání z e-shopu <a href="http://www.caskrmeni.cz">www.caskremeni.cz</a>.<br />&nbsp;</div>
 	<form class="loginForm" name="loginForm" onsubmit="return goLogin()">
 		Jméno:<br />
 		<input type="text" name="username" id="txtUsername" value=""/><br />
@@ -235,7 +240,8 @@ if (!window.cordova) {
 		<br /><br />
 		<input type="submit" value="Přihlásit se" />
 	</form>
-	<br /><br />.
+	
+	<br /><br />&nbsp;
 </div>
 <div id="divObjednavka" class="subPage">
 	<div id="divObjednavkaBody"></div>
@@ -243,7 +249,7 @@ if (!window.cordova) {
 <div id="divDekujeme" class="subPage">
 	<div class="center">Děkujeme za Vaši objednávku. Přijali jsme ji pod číslem:<br />
 		<span id="spanObjednavka">1231231</span><br /><br />
-		<input type="button" value="Zpět na objednávku" class="btnZpet" onclick="goZpet()" />
+		<input type="button" value="Zavřít aplikaci" class="btnZpet" onclick="goExit()" />
 	</div>
 </div>
 </body>
